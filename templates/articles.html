@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+
+
+{% block head %}
+<title>Articles</title>
+{% endblock %}
+
+{% block body %}
+
+<h1>All Articles</h1>
+<hr>
+{% for article in articles %}
+<h1><a href="/article/{{article.id}}">{{article.title}}</a></h1>
+<small>author: {{article.author}} on: {{article.date_posted}}</small>
+<!-- <p>{{article.body}}</p> -->
+<hr>
+{% endfor %}
+
+{% endblock %}
