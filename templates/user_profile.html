@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+<title>User Profile</title>
+{% endblock %}
+
+{% block body %}
+<!-- {{details}} -->
+<div class="container mt-3">        
+    <div class="profile-card">
+        <div class="jumbotron">
+            <div class="row">
+                <div class="col-4">
+                    <div class="profile-img">
+                        <img class="img-responsive" src="templates/images/profile.png" alt="Profile Photo">
+                    </div>
+                    <div class="profile-name"><strong>Name: {{details.name}}</strong></div>
+                    <div class="profile-email"><strong>Email: {{details.email}}</strong></div>
+                    <div class="profile-location"><strong>Location: {{details.city}}</strong></div>
+                    <div class="mt-3"><a class="btn btn-primary" href="/edit_profile/{{details.id}}">Edit Profile</a></div>
+                    <div class="mt-3"><a class="btn btn-primary" href="/edit_user_details/{{details.id}}">Edit User Details</a></div>
+                </div>
+                <div class="col-8">
+                    <div>
+                        <h2>{{details.curr_job_title}} at {{details.curr_company}}</h2>
+                    </div>
+                    <div>
+                        <p>Skills: {{details.skills}} </p>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

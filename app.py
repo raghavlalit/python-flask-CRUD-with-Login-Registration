@@ -56,6 +56,7 @@ class RegisterForm(Form):
 			validators.EqualTo('confirm', message='password do not match')
 		])
 	confirm= PasswordField('Confirm Password')
+	city= StringField('City', [validators.Length(min=1, max=50)])
 
 #User Registration
 @app.route('/register', methods=['GET', 'POST'])
@@ -67,9 +68,10 @@ def register():
 		email= form.email.data
 		username= form.username.data
 		password= sha256_crypt.encrypt(str(form.password.data))
+		city= form.city.data
 
 		cur = mysql.connection.cursor()
-		cur.execute("INSERT INTO users(name, email, username, password) VALUES(%s, %s, %s,%s)", (name, email, username, password))
+		cur.execute("INSERT INTO users(name, email, username, password, city) VALUES(%s, %s, %s,%s,%s)", (name, email, username, password, city))
 		mysql.connection.commit()
 		cur.close()
 
@@ -206,6 +208,82 @@ def delete_article(id):
 	flash('Article deleted', 'success')
 	return redirect(url_for('dashboard'))
 
+#user Profile
+@app.route('/user_profile') 
+@is_logged_in  
+def user_profile():
+	user_name = session['username']
+	cur = mysql.connection.cursor()
+	result = cur.execute("SELECT users.*, user_details.* from users INNER JOIN user_details on users.id=user_details.uid WHERE users.username=%s", [user_name])
+	details = cur.fetchone()
+	# skills = json.loads(details['skills'])
+
+	if result>0:
+		return render_template('user_profile.html', details=details)
+	else:
+		msg = 'No Article found'
+		return render_template('user_profile.html', msg=msg)
+	cur.close()
+
+#Edit profile
+@app.route('/edit_profile/<string:id>', methods=['GET', 'POST'])
+@is_logged_in  
+def edit_profile(id):
+	cur = mysql.connection.cursor()
+	result = cur.execute("SELECT * FROM users WHERE id =%s", [id])
+	user = cur.fetchone()
+	cur.close()
+	form = RegisterForm(request.form)
+	form.name.data = user['name']
+	form.email.data = user['email']
+	form.city.data = user['city']
+
+	if request.method == 'POST':
+		name = request.form['name']
+		email = request.form['email']
+		city = request.form['city']
+
+		#mysql update
+		cur = mysql.connection.cursor()
+		cur.execute("UPDATE users set name=%s, email=%s, city=%s WHERE id=%s", (name, email, city, id))
+		mysql.connection.commit()
+		cur.close()
+		session['name'] = name
+
+		flash('User Updated', 'success')
+		return redirect(url_for('user_profile'))
+
+	return render_template('edit_profile.html', form=form)
+
+#Edit user details
+@app.route('/edit_user_details/<string:id>', methods=['GET', 'POST'])
+@is_logged_in  
+def user_details(id):
+	cur = mysql.connection.cursor()
+	result = cur.execute("SELECT * FROM users_details WHERE uid =%s", [id])
+	user = cur.fetchone()
+	cur.close()
+	form = RegisterForm(request.form)
+	form.name.data = user['name']
+	form.email.data = user['email']
+	form.city.data = user['city']
+
+	if request.method == 'POST':
+		name = request.form['name']
+		email = request.form['email']
+		city = request.form['city']
+
+		#mysql update
+		cur = mysql.connection.cursor()
+		cur.execute("UPDATE users set name=%s, email=%s, city=%s WHERE id=%s", (name, email, city, id))
+		mysql.connection.commit()
+		cur.close()
+		session['name'] = name
+
+		flash('User Updated', 'success')
+		return redirect(url_for('user_profile'))
+
+	return render_template('user_details.html', form=form)
 
 if __name__ =='__main__':
 	app.secret_key = "secret123"
